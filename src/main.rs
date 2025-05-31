@@ -51,7 +51,7 @@ fn main() {
             
 
             if sell == true {
-                println!("{} [{}] {} {} {:.2} {} ({:.2}) @ ${:.8}", date_print, trade_type_print, "SELL".red(), username_print, amount_print, coin_print, total_buy_print, single_coin_price_print);
+                println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", date_print, trade_type_print, "SELL".red(), username_print, amount_print, coin_print, total_buy_print, single_coin_price_print);
             } else {
                 println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", date_print, trade_type_print, "BUY".green(), username_print, amount_print, coin_print, total_buy_print, single_coin_price_print);
             }
