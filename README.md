@@ -4,13 +4,17 @@
 
 ## Usage
 To run this, you will need cargo. When you have that, simply run:
+
 ```cargo run```
 
 ## Customize
 There isn't a lot to customize. At the moment, the only real thing that you can tweak is the ability to print out "live-trade" buy and sells. 
 Change this by changing the line:
+
 ```let show_live_trade = false;```
+
 to
+
 ```let show_live_trade = true;```
 
 ## Contributing
