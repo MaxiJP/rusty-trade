@@ -8,6 +8,8 @@ fn main() {
 
     let (mut socket, _response) = connect("ws://ws.rugplay.com/api/").expect("Can't connect");
 
+    let show_live_trade = false;
+
     socket.send(Message::Text("{\"type\":\"subscribe\",\"channel\":\"trades:all\"}".into())).unwrap();
     socket.send(Message::Text("{\"type\":\"set_coin\",\"coinSymbol\":\"@global\"}".into())).unwrap();
     loop {
@@ -49,7 +51,11 @@ fn main() {
             let single_coin_price_print = single_coin_price.as_slice()[0];
             let username_print = username.as_str().as_slice()[0];
             
-            if trade_type_print == "live-trade" {}
+            if trade_type_print == "live-trade" {
+                if !show_live_trade {
+                    break;
+                }
+            }
 
             if sell == true {
                 println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", date_print, trade_type_print, "SELL".red(), username_print, amount_print, coin_print, total_buy_print, single_coin_price_print);
