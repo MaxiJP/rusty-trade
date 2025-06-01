@@ -1,5 +1,7 @@
 # Rusty Trade
 
+![Example Screenshot](ss.png)
+
 > **⚠ Warning**<br> Rusty Trade is in very early alpha development stages. On top of this, this program is my first ever 100% rust program and will not be formatted well or "correctly". If you just can't be bothered to make your own tracker, absolutely use this. I'm not gonna judge you for it.
 
 ## Usage
