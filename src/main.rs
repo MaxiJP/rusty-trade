@@ -66,38 +66,34 @@ fn start_database(conn: &Connection) -> Result<()>{
 fn main() -> Result<()> {
 
     let (mut socket, _response) = connect("ws://ws.rugplay.com/api/").expect("Can't connect");
+    socket.send(Message::Text("{\"type\":\"subscribe\",\"channel\":\"trades:all\"}".into())).unwrap();
+    socket.send(Message::Text("{\"type\":\"set_coin\",\"coinSymbol\":\"@global\"}".into())).unwrap();
+
     let conn = Connection::open("trades.db")?;
+    let _ = start_database(&conn);
 
     let show_live_trade = false;
 
-    socket.send(Message::Text("{\"type\":\"subscribe\",\"channel\":\"trades:all\"}".into())).unwrap();
-    socket.send(Message::Text("{\"type\":\"set_coin\",\"coinSymbol\":\"@global\"}".into())).unwrap();
-    start_database(&conn);
-
     loop {
         let msg = socket.read();
-        let mut sell;
-        let mut username;
-        let mut amount;
-        let mut coin;
-        let mut total_buy;
-        let mut single_coin_price;
-        let mut trade_type;
-
         for message in &msg {
             let msg_string = message.to_string();
             let v: Value = serde_json::from_str(&msg_string).expect("REASON");
+
+            let mut sell;
+
             if v["data"]["type"] == "SELL" {
                 sell = true;
             } else {
                 sell = false;
             }
-            username = v["data"]["username"].clone();
-            amount = v["data"]["amount"].clone().as_f64();
-            coin = v["data"]["coinSymbol"].clone();
-            total_buy = v["data"]["totalValue"].clone().as_f64();
-            single_coin_price = v["data"]["price"].clone().as_f64();
-            trade_type = v["type"].clone();
+
+            let username = v["data"]["username"].clone();
+            let amount = v["data"]["amount"].clone().as_f64();
+            let coin = v["data"]["coinSymbol"].clone();
+            let total_buy = v["data"]["totalValue"].clone().as_f64();
+            let single_coin_price = v["data"]["price"].clone().as_f64();
+            let trade_type = v["type"].clone();
 
             let trade_type_print = trade_type.as_str().as_slice()[0];
             let date = Local::now();
@@ -133,7 +129,7 @@ fn main() -> Result<()> {
                 date_print: date_print.to_string(),
             };
 
-            add_trade_to_db(&trade, &conn);
+            let _ = add_trade_to_db(&trade, &conn);
             
             if trade_type_print == "live-trade" {
                 if !show_live_trade {
