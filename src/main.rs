@@ -30,7 +30,16 @@ fn add_trade_to_db(trade: &MaxTrade, conn: &Connection) -> Result<()> {
     conn.execute(
         "INSERT INTO trades (timestamp, trade_type_val, action, username, amount, coin_symbol, total_value, price) values
                             (?1,        ?2,             ?3,     ?4,       ?5,     ?6,          ?7,          ?8)",
-        params![trade.time, trade.trade_type, sell_text, trade.username, trade.amount, trade.coin, trade.total_buy, trade.single_coin_price]
+        params![
+            trade.time,
+            trade.trade_type,
+            sell_text,
+            trade.username,
+            trade.amount,
+            trade.coin,
+            trade.total_buy,
+            trade.single_coin_price
+        ]
     )?;
     Ok(())
 }
@@ -63,7 +72,6 @@ fn main() -> Result<()> {
 
     socket.send(Message::Text("{\"type\":\"subscribe\",\"channel\":\"trades:all\"}".into())).unwrap();
     socket.send(Message::Text("{\"type\":\"set_coin\",\"coinSymbol\":\"@global\"}".into())).unwrap();
-
     start_database(&conn);
 
     loop {
