@@ -20,7 +20,7 @@ struct MaxTrade {
 
 
 fn add_trade_to_db(trade: &MaxTrade, conn: &Connection) -> Result<()> {
-    let mut sell_text;
+    let sell_text;
     if trade.sell {
         sell_text = String::from("SELL")
     } else {
@@ -76,11 +76,11 @@ fn main() -> Result<()> {
 
     loop {
         let msg = socket.read();
-        for message in &msg {
+        if let Ok(message) = &msg {
             let msg_string = message.to_string();
             let v: Value = serde_json::from_str(&msg_string).expect("REASON");
 
-            let mut sell;
+            let sell;
 
             if v["data"]["type"] == "SELL" {
                 sell = true;
@@ -98,7 +98,7 @@ fn main() -> Result<()> {
             let trade_type_print = trade_type.as_str().as_slice()[0];
             let date = Local::now();
             let date_print = date.format("%H:%M:%S");
-            let mut epoch;
+            let epoch;
 
             match SystemTime::now().duration_since(UNIX_EPOCH) {
                 Ok(n) => {
@@ -108,7 +108,7 @@ fn main() -> Result<()> {
             }
 
             if trade_type_print == "ping" {
-                break;
+                break Ok(());
             }
             
             let amount_print = amount.as_slice()[0];
@@ -133,11 +133,11 @@ fn main() -> Result<()> {
             
             if trade_type_print == "live-trade" {
                 if !show_live_trade {
-                    break;
+                    break Ok(());
                 }
             }
 
-            let mut trade_direction;
+            let trade_direction;
 
             if trade.sell == true {trade_direction = "SELL".red()} else {trade_direction = "BUY".green()};
 
