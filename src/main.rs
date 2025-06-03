@@ -137,11 +137,11 @@ fn main() -> Result<()> {
                 }
             }
 
-            if trade.sell == true {
-                println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", trade.date_print, trade.trade_type, "SELL".red(), trade.username, trade.amount, trade.coin, trade.total_buy, trade.single_coin_price);
-            } else {
-                println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", trade.date_print, trade.trade_type, "BUY".green(), trade.username, trade.amount, trade.coin, trade.total_buy, trade.single_coin_price);
-            }
+            let mut trade_direction;
+
+            if trade.sell == true {trade_direction = "SELL".red()} else {trade_direction = "BUY".green()};
+
+            println!("{} [{}] {} {} {:.2} {} (${:.2}) @ ${:.8}", trade.date_print, trade.trade_type, trade_direction, trade.username, trade.amount, trade.coin, trade.total_buy, trade.single_coin_price);
 
         }
         
