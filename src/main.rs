@@ -63,6 +63,52 @@ fn start_database(conn: &Connection) -> Result<()>{
     Ok(())
 }
 
+fn make_struct(v: Value) -> MaxTrade {
+
+    let sell;
+    if v["data"]["type"] == "SELL" {sell = true} else {sell = false};
+
+    let username = v["data"]["username"].clone();
+    let amount = v["data"]["amount"].clone().as_f64();
+    let coin = v["data"]["coinSymbol"].clone();
+    let total_buy = v["data"]["totalValue"].clone().as_f64();
+    let single_coin_price = v["data"]["price"].clone().as_f64();
+    let trade_type = v["type"].clone();
+
+    let trade_type_print = trade_type.as_str().as_slice()[0];
+    let date = Local::now();
+    let date_print = date.format("%H:%M:%S");
+    let epoch;
+
+    match SystemTime::now().duration_since(UNIX_EPOCH) {
+        Ok(n) => {
+            epoch = n.as_secs();
+        },
+        Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+    }
+
+    let amount_print = amount.as_slice()[0];
+    let coin_print = coin.as_str().as_slice()[0];
+    let total_buy_print = total_buy.as_slice()[0];
+    let single_coin_price_print = single_coin_price.as_slice()[0];
+    let username_print = username.as_str().as_slice()[0];
+
+    let trade = MaxTrade {
+        sell: sell,
+        username: username_print.to_string(),
+        amount: amount_print,
+        coin: coin_print.to_string(),
+        total_buy: total_buy_print,
+        single_coin_price: single_coin_price_print,
+        trade_type: trade_type_print.to_string(),
+        time: epoch,
+        date_print: date_print.to_string(),
+    };
+
+    return trade;
+
+}
+
 fn main() -> Result<()> {
 
     let (mut socket, _response) = connect("ws://ws.rugplay.com/api/").expect("Can't connect");
@@ -76,64 +122,25 @@ fn main() -> Result<()> {
 
     loop {
         let msg = socket.read();
-        if let Ok(message) = &msg {
+        for message in &msg {
             let msg_string = message.to_string();
             let v: Value = serde_json::from_str(&msg_string).expect("REASON");
 
-            let sell;
-
-            if v["data"]["type"] == "SELL" {
-                sell = true;
-            } else {
-                sell = false;
-            }
-
-            let username = v["data"]["username"].clone();
-            let amount = v["data"]["amount"].clone().as_f64();
-            let coin = v["data"]["coinSymbol"].clone();
-            let total_buy = v["data"]["totalValue"].clone().as_f64();
-            let single_coin_price = v["data"]["price"].clone().as_f64();
             let trade_type = v["type"].clone();
-
             let trade_type_print = trade_type.as_str().as_slice()[0];
-            let date = Local::now();
-            let date_print = date.format("%H:%M:%S");
-            let epoch;
-
-            match SystemTime::now().duration_since(UNIX_EPOCH) {
-                Ok(n) => {
-                    epoch = n.as_secs();
-                },
-                Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-            }
 
             if trade_type_print == "ping" {
-                break Ok(());
+                break;
             }
             
-            let amount_print = amount.as_slice()[0];
-            let coin_print = coin.as_str().as_slice()[0];
-            let total_buy_print = total_buy.as_slice()[0];
-            let single_coin_price_print = single_coin_price.as_slice()[0];
-            let username_print = username.as_str().as_slice()[0];
 
-            let trade = MaxTrade {
-                sell: sell,
-                username: username_print.to_string(),
-                amount: amount_print,
-                coin: coin_print.to_string(),
-                total_buy: total_buy_print,
-                single_coin_price: single_coin_price_print,
-                trade_type: trade_type_print.to_string(),
-                time: epoch,
-                date_print: date_print.to_string(),
-            };
+            let trade = make_struct(v);
 
             let _ = add_trade_to_db(&trade, &conn);
             
             if trade_type_print == "live-trade" {
                 if !show_live_trade {
-                    break Ok(());
+                    break;
                 }
             }
 
